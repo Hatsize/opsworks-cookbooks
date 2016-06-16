@@ -40,7 +40,7 @@ defaults
   <% end -%>
         
 # Set up application listeners here.
-<% if node[:haproxy][:rails_backends].blank? && node[:haproxy][:php_backends].blank? && node[:haproxy][:nodejs_backends].blank? && node[:haproxy][:static_backends].blank? && node[:opsworks][:layers][:labview_backends][:instances].blank? -%>
+<% if node[:haproxy][:rails_backends].blank? && node[:haproxy][:php_backends].blank? && node[:haproxy][:nodejs_backends].blank? && node[:haproxy][:static_backends].blank? && node[:opsworks][:layers][:labview_backends][:instances].blank? && node[:opsworks][:layers][:guacamole][:instances].blank? -%>
 listen application 0.0.0.0:80
   # configure a fake backend as long as there are no real ones
   # this way HAProxy will not fail on a config check
@@ -157,7 +157,28 @@ backend labview_servers_ssl
   server <%= name %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 <% end -%>
+  
+<% if !node[:opsworks][:layers][:guacamole][:instances].empty? -%>
+backend guacamole_servers
+  balance <%= node[:haproxy][:balance] %>
+  option redispatch
+  option forwardfor
+  option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
+  <% node[:opsworks][:layers][:guacamole][:instances].each do |name,backend| -%>
+  server <%= name %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
+  <% end -%>
+<% end -%>
 
+<% if !node[:opsworks][:layers][:guacamole][:instances].empty? -%>
+backend guacamole_servers_ssl
+  mode tcp
+  balance <%= node[:haproxy][:balance] %>
+  option redispatch
+  option ssl-hello-chk
+  <% node[:opsworks][:layers][:guacamole][:instances].each do |name,backend| -%>
+  server <%= name %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
+  <% end -%>
+<% end -%>
 frontend http-in
   bind :80
   
@@ -260,6 +281,8 @@ frontend http-in
   default_backend static_servers
   <% elsif !node[:opsworks][:layers][:labview_backends][:instances].empty? -%>
   default_backend labview_servers
+  <% elsif !node[:opsworks][:layers][:guacamole][:instances].empty? -%>
+  default_backend guacamole_servers
   <% end -%>
   
 frontend https-in
@@ -317,6 +340,8 @@ frontend https-in
   default_backend static_servers_ssl
   <% elsif !node[:opsworks][:layers][:labview_backends][:instances].empty? -%>
   default_backend labview_servers_ssl
+  <% elsif !node[:opsworks][:layers][:guacamole][:instances].empty? -%>
+  default_backend guacamole_servers_ssl
   <% end -%>
 
 <% end -%>
