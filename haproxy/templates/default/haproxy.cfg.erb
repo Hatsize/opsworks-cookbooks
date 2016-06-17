@@ -142,6 +142,7 @@ backend labview_servers
   option redispatch
   option forwardfor
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
+  cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:labview_backends][:instances].each do |name,backend| -%>
   server <%= name %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
@@ -153,6 +154,7 @@ backend labview_servers_ssl
   balance <%= node[:haproxy][:balance] %>
   option redispatch
   option ssl-hello-chk
+  cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:labview_backends][:instances].each do |name,backend| -%>
   server <%= name %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
@@ -164,6 +166,7 @@ backend guacamole_servers
   option redispatch
   option forwardfor
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
+  cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:guacamole][:instances].each do |name,backend| -%>
   server <%= name %> <%= backend['ip'] %>:80 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
@@ -175,6 +178,7 @@ backend guacamole_servers_ssl
   balance <%= node[:haproxy][:balance] %>
   option redispatch
   option ssl-hello-chk
+  cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:guacamole][:instances].each do |name,backend| -%>
   server <%= name %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
