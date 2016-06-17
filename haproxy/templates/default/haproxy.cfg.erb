@@ -339,7 +339,7 @@ frontend https-in
   <% end -%>
   
   <% unless node[:opsworks][:layers][:guacamole][:instances].empty? -%>
-  use_backend guacamole_servers if guacamole_path
+  use_backend guacamole_servers_ssl if guacamole_path
   <% end -%>
   
   <% if !node[:haproxy][:rails_backends].empty? -%>
