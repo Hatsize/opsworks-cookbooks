@@ -65,6 +65,8 @@ backend php_app_servers_ssl
 <% if !node[:opsworks][:layers][:labview_backends][:instances].empty? -%>
 backend labview_servers
   balance <%= node[:haproxy][:balance] %>
+  stick-table type ip size 20k
+  stick on src
   option redispatch
   option forwardfor
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
@@ -78,6 +80,8 @@ backend labview_servers
 backend labview_servers_ssl
   mode tcp
   balance <%= node[:haproxy][:balance] %>
+  stick-table type ip size 20k
+  stick on src
   option redispatch
   option ssl-hello-chk
   cookie SERVERID insert indirect nocache
@@ -89,6 +93,8 @@ backend labview_servers_ssl
 <% if !node[:opsworks][:layers][:guacamole][:instances].empty? -%>
 backend guacamole_servers
   balance <%= node[:haproxy][:balance] %>
+  stick-table type ip size 20k
+  stick on src
   option redispatch
   option forwardfor
   option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
@@ -102,6 +108,8 @@ backend guacamole_servers
 backend guacamole_servers_ssl
   mode tcp
   balance <%= node[:haproxy][:balance] %>
+  stick-table type ip size 20k
+  stick on src
   option redispatch
   option ssl-hello-chk
   cookie SERVERID insert indirect nocache
