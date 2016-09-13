@@ -97,10 +97,11 @@ backend labview_mgmt
   stick-table type ip size 20k
   stick on src
   option redispatch
-  option ssl-hello-chk
+  option forwardfor
+  option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
   cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:labview_backends][:instances].each do |name,backend| -%>
-  server <%= name %> <%= backend['ip'] %>:9102 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
+  server <%= name %> <%= backend['ip'] %>:9102 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 <% end -%>
 
