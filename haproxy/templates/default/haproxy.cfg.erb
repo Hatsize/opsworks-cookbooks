@@ -91,17 +91,17 @@ backend labview_servers_ssl
 <% end -%>
 
 <% if !node[:opsworks][:layers][:labview_backends][:instances].empty? -%>
-backend labview_mgmt
-  mode tcp
+backend labview_mgmt_servers
+  mode http
   balance <%= node[:haproxy][:balance] %>
   stick-table type ip size 20k
   stick on src
   option redispatch
   option forwardfor
-  option httpchk <%= node[:haproxy][:health_check_method] %> <%= node[:haproxy][:health_check_url] %>
+  option http-server-close
   cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:labview_backends][:instances].each do |name,backend| -%>
-  server <%= name %> <%= backend['ip'] %>:9102 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
+  server <%= name %> <%= backend['ip'] %>:9102 cookie weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 <% end -%>
 
@@ -132,6 +132,7 @@ backend guacamole_servers_ssl
   server <%= name %> <%= backend['ip'] %>:443 weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app_ssl] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 <% end -%>
+
 frontend http-in
   bind :80
 
@@ -174,8 +175,8 @@ frontend https-in
   
   default_backend labview_servers_ssl
 
-frontend mgmt
-  mode tcp
+frontend lv-mgmt-in
+  mode http
   bind :9102
   
-  default_backend labview_mgmt
+  default_backend labview_mgmt_servers
