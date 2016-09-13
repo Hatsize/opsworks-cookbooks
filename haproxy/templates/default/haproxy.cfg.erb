@@ -101,7 +101,7 @@ backend labview_mgmt_servers
   option http-server-close
   cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:labview_backends][:instances].each do |name,backend| -%>
-  server <%= name %> <%= backend['ip'] %>:9102 cookie weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
+  server <%= name %> <%= backend['ip'] %>:9102 cookie <%= name %> weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
   <% end -%>
 <% end -%>
 
