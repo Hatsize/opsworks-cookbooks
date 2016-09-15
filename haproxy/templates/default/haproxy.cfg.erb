@@ -99,6 +99,7 @@ backend labview_mgmt_servers
   option redispatch
   option forwardfor
   option http-server-close
+  option httpchk OPTIONS /mgmt/health
   cookie SERVERID insert indirect nocache
   <% node[:opsworks][:layers][:labview_backends][:instances].each do |name,backend| -%>
   server <%= name %> <%= backend['ip'] %>:9102 cookie <%= name %> weight <%= backend['backends'] || 10 %> maxconn <%= backend['backends'] * node[:haproxy][:maxcon_factor_java_app] %> check inter <%= node[:haproxy][:check_interval] %>
@@ -178,5 +179,6 @@ frontend https-in
 frontend lv-mgmt-in
   mode http
   bind :9102
+  option httplog
   
   default_backend labview_mgmt_servers
